@@ -24,24 +24,23 @@ global class Lookup {
             			' FROM '+objectName+
             				' WHERE '+fld_API_Search+' LIKE '+searchText+ 
             			' LIMIT '+lim;
-        system.debug(query);
+        /**
+     * Updated by Dane Kim on 10/16/18.
+     * -Allows for multiple fields to be displayed for lookup results.
+     * -Supports lookup queries traversing multiple objects
+     * */
         List<sObject> sobjList = Database.query(query);
         List<ResultWrapper> lstRet = new List<ResultWrapper>();
-        system.debug(sobjList);
         for(SObject s : sobjList){
             ResultWrapper obj = new ResultWrapper();
             obj.objName = objectName;
-            System.debug(fld_API_Text);
             String[] returnfields = fld_API_Text.split(',');
-            system.debug(returnfields);
             String value;
             String[] subField;
             List<String> subValue = new List<String>();
             for(Integer i = 0; i < returnfields.size(); i++){
-                System.debug(returnfields[i]);
                 if(returnfields[i].contains('.')){
                     subField = returnfields[i].split('\\.');
-                    system.debug(subField);
                     SObject subObject = s.getSObject(subField[0]);
                     if(subObject != null){
                         subField.remove(0);
@@ -53,8 +52,6 @@ global class Lookup {
                     }
                 }
                 else{
-                    System.debug(s);
-                    system.debug(returnfields[i]);
                     value = String.valueOf(s.get(returnfields[i]));
                 }
                 if(i == 0) obj.text = value;
@@ -62,7 +59,6 @@ global class Lookup {
                     subValue.add(value);
                 }        
             }
-            System.debug(obj.text);
             obj.val = String.valueOf(s.get(fld_API_Val));
             obj.subText = subValue;
             lstRet.add(obj);
